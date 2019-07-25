@@ -10,6 +10,10 @@ var connectingElement = document.querySelector('.connecting');
 
 var stompClient = null;
 var username = null;
+var cpf_cnpj = null;
+var cnpj_credor = null;
+var topic_url = null;
+var send_url = null;
 
 var colors = [
     '#2196F3', '#32c787', '#00BCD4', '#ff5652',
@@ -18,6 +22,8 @@ var colors = [
 
 function connect(event) {
     username = document.querySelector('#name').value.trim();
+    cpf_cnpj = document.querySelector('#cpf_cnpj').value.trim();
+    cnpj_credor = document.querySelector('#cnpj_credor').value.trim();
 
     if(username) {
         usernamePage.classList.add('hidden');
@@ -33,8 +39,11 @@ function connect(event) {
 
 
 function onConnected() {
+	
+	topic_url = '/topic/public/' + cnpj_credor + "/" + cpf_cnpj;
+	
     // Subscribe to the Public Topic
-    stompClient.subscribe('/topic/public', onMessageReceived);
+    stompClient.subscribe(topic_url, onMessageReceived);
 
     // Tell your username to the server
     stompClient.send("/app/chat.addUser",
@@ -53,6 +62,8 @@ function onError(error) {
 
 
 function sendMessage(event) {
+	
+	send_url = "/app/chat.sendMessage/" + cnpj_credor + "/" + cpf_cnpj;
     var messageContent = messageInput.value.trim();
     if(messageContent && stompClient) {
         var chatMessage = {
@@ -60,7 +71,7 @@ function sendMessage(event) {
             content: messageInput.value,
             type: 'CHAT'
         };
-        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+        stompClient.send(send_url, {}, JSON.stringify(chatMessage));
         messageInput.value = '';
     }
     event.preventDefault();
